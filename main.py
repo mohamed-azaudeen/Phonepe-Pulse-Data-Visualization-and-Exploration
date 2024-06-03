@@ -7,6 +7,535 @@ from streamlit_option_menu import option_menu
 import mysql.connector
 import requests
 
+def get_insert_data():
+    path = "C:/Users/azaru/Azar documents/data/pulse/data/aggregated/transaction/country/india/state/"
+    agg_state_list = os.listdir(path)
+
+    clm = {'State':[], 'Year':[], 'Quater':[], 'Transacion_type':[], 'Transacion_count':[],  'Transacion_amount':[]}
+
+    for i in agg_state_list:
+        p_i=path+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D=json.load(data)
+                for z in D['data']['transactionData']:
+                    name=z['name']
+                    count=z['paymentInstruments'][0]['count']
+                    amount=z['paymentInstruments'][0]['amount']
+                    clm['Transacion_type'].append(name)
+                    clm['Transacion_count'].append(count)
+                    clm['Transacion_amount'].append(amount)
+                    clm['State'].append(i)
+                    clm['Year'].append(j)
+                    clm['Quater'].append(int(k.strip('.json')))
+
+    agg_trans=pd.DataFrame(clm)   
+
+    agg_trans['State']=agg_trans['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    agg_trans['State']=agg_trans['State'].str.replace('-',' ')
+    agg_trans['State']=agg_trans['State'].str.title()
+    agg_trans['State']=agg_trans['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path1="C:/Users/azaru/Azar documents/data/pulse/data/aggregated/user/country/india/state/"
+    agg_state_list_1=os.listdir(path1)
+
+    clm1={'State':[], 'Year':[], 'Quater':[], 'brand_name':[], 'Transacion_count':[], 'percentage':[]}
+
+    for i in agg_state_list_1:
+        q_i=path1+i+"/"
+        agg_user_year=os.listdir(q_i)
+        for j in agg_user_year:
+            q_j=q_i+j+"/"
+            agg_user_year_list=os.listdir(q_j)
+            for k in agg_user_year_list:
+                q_k=q_j+k
+                data1=open(q_k,'r')
+                D1=json.load(data1)
+                try:
+                    for z in D1['data']['usersByDevice']:
+                        brand=z['brand']
+                        count=z['count']
+                        percentage=z['percentage']
+                        clm1['brand_name'].append(brand)
+                        clm1['Transacion_count'].append(count)
+                        clm1['percentage'].append(percentage)
+                        clm1['State'].append(i)
+                        clm1['Year'].append(j)
+                        clm1['Quater'].append(int(k.strip('.json')))
+                except:
+                    pass    
+
+    agg_user=pd.DataFrame(clm1)
+
+    agg_user['State']=agg_user['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    agg_user['State']=agg_user['State'].str.replace('-',' ')
+    agg_user['State']=agg_user['State'].str.title()
+    agg_user['State']=agg_user['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+                
+    path2="C:/Users/azaru/Azar documents/data/pulse/data/map/transaction/hover/country/india/state/"
+    map_trans_list = os.listdir(path2)
+
+    clm2={'State':[], 'Year':[], 'Quater':[], 'state_name':[], 'Transacion_count':[],  'Transacion_amount':[]}
+
+    for i in map_trans_list:
+        p_i=path2+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D2=json.load(data)
+                for z in D2['data']['hoverDataList']:
+                    name=z['name']
+                    count=z['metric'][0]['count']
+                    amount=z['metric'][0]['amount']
+                    clm2['state_name'].append(name)
+                    clm2['Transacion_count'].append(count)
+                    clm2['Transacion_amount'].append(amount)
+                    clm2['State'].append(i)
+                    clm2['Year'].append(j)
+                    clm2['Quater'].append(int(k.strip('.json')))
+
+    map_trans=pd.DataFrame(clm2)                
+
+    map_trans['State']=map_trans['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    map_trans['State']=map_trans['State'].str.replace('-',' ')
+    map_trans['State']=map_trans['State'].str.title()
+    map_trans['State']=map_trans['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path3="C:/Users/azaru/Azar documents/data/pulse/data/map/user/hover/country/india/state/"
+    map_user_list = os.listdir(path3)
+
+    clm3={'State':[], 'Year':[], 'Quater':[], 'district':[], 'registeredUsers':[], 'appOpens':[]}
+
+    for i in map_user_list:
+        q_i=path3+i+"/"
+        agg_user_year=os.listdir(q_i)
+        for j in agg_user_year:
+            q_j=q_i+j+"/"
+            agg_user_year_list=os.listdir(q_j)
+            for k in agg_user_year_list:
+                q_k=q_j+k
+                data1=open(q_k,'r')
+                D3=json.load(data1)
+                for z in D3['data']['hoverData'].items():
+                    district=z[0]
+                    registeredUsers=z[1]['registeredUsers']
+                    appOpens=z[1]['appOpens']
+                    clm3['district'].append(district)
+                    clm3['registeredUsers'].append(registeredUsers)
+                    clm3['appOpens'].append(appOpens)
+                    clm3['State'].append(i)
+                    clm3['Year'].append(j)
+                    clm3['Quater'].append(int(k.strip('.json')))
+
+    map_user=pd.DataFrame(clm3)   
+
+    map_user['State']=map_user['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    map_user['State']=map_user['State'].str.replace('-',' ')
+    map_user['State']=map_user['State'].str.title()
+    map_user['State']=map_user['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')    
+
+    path4="C:/Users/azaru/Azar documents/data/pulse/data/top/transaction/country/india/"
+    top_trans_state_list = os.listdir(path4)
+
+    clm4={'Year':[], 'Quater':[], 'state_name':[], 'Transacion_count':[],  'Transacion_amount':[]}
+
+    for i in top_trans_state_list:
+        p_i=path4+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j
+            data=open(p_j,'r')
+            D4=json.load(data)
+            for z in D4['data']['states']:
+                        name=z['entityName']
+                        count=z['metric']['count']
+                        amount=z['metric']['amount']
+                        clm4['state_name'].append(name)
+                        clm4['Transacion_count'].append(count)
+                        clm4['Transacion_amount'].append(amount)
+                        clm4['Year'].append(i)
+                        clm4['Quater'].append(int(j.strip('.json')))
+                        
+    top_trans_state=pd.DataFrame(clm4)     
+
+    top_trans_state['state_name']=top_trans_state['state_name'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_trans_state['state_name']=top_trans_state['state_name'].str.replace('-',' ')
+    top_trans_state['state_name']=top_trans_state['state_name'].str.title()
+    top_trans_state['state_name']=top_trans_state['state_name'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path5="C:/Users/azaru/Azar documents/data/pulse/data/top/transaction/country/state/"
+    top_trans_dist_list = os.listdir(path5)
+
+    clm5={'State':[], 'Year':[], 'Quater':[], 'district_name':[], 'Transacion_count':[],  'Transacion_amount':[]}
+
+    for i in top_trans_dist_list:
+        p_i=path5+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D5=json.load(data)  
+                for z in D5['data']['districts']:
+                        name=z['entityName']
+                        count=z['metric']['count']
+                        amount=z['metric']['amount']
+                        clm5['district_name'].append(name)
+                        clm5['Transacion_count'].append(count)
+                        clm5['Transacion_amount'].append(amount)
+                        clm5['State'].append(i)
+                        clm5['Year'].append(j)
+                        clm5['Quater'].append(int(k.strip('.json')))
+                                
+            
+            
+    top_trans_dist=pd.DataFrame(clm5)   
+
+    top_trans_dist['State']=top_trans_dist['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_trans_dist['State']=top_trans_dist['State'].str.replace('-',' ')
+    top_trans_dist['State']=top_trans_dist['State'].str.title()
+    top_trans_dist['State']=top_trans_dist['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path6="C:/Users/azaru/Azar documents/data/pulse/data/top/transaction/country/state/"
+    top_trans_pin_list = os.listdir(path6)
+
+    clm6={'State':[], 'Year':[], 'Quater':[], 'pincode':[], 'Transacion_count':[],  'Transacion_amount':[]}
+
+    for i in top_trans_pin_list:
+        p_i=path6+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D6=json.load(data)  
+                for z in D6['data']['pincodes']:
+                        name=z['entityName']
+                        count=z['metric']['count']
+                        amount=z['metric']['amount']
+                        clm6['pincode'].append(name)
+                        clm6['Transacion_count'].append(count)
+                        clm6['Transacion_amount'].append(amount)
+                        clm6['State'].append(i)
+                        clm6['Year'].append(j)
+                        clm6['Quater'].append(int(k.strip('.json')))
+                                
+            
+            
+    top_trans_pin=pd.DataFrame(clm6)      
+
+    top_trans_pin['State']=top_trans_pin['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_trans_pin['State']=top_trans_pin['State'].str.replace('-',' ')
+    top_trans_pin['State']=top_trans_pin['State'].str.title()
+    top_trans_pin['State']=top_trans_pin['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path7="C:/Users/azaru/Azar documents/data/pulse/data/top/user/country/india/"
+    top_user_state_list = os.listdir(path7)
+
+    clm7={'Year':[], 'Quater':[], 'state_name':[], 'registeredUsers':[]}
+
+    for i in top_user_state_list:
+        p_i=path7+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j
+            data=open(p_j,'r')
+            D7=json.load(data)
+            for z in D7['data']['states']:
+                        name=z['name']
+                        reguser=z['registeredUsers']
+                        clm7['state_name'].append(name)
+                        clm7['registeredUsers'].append(reguser)
+                        clm7['Year'].append(i)
+                        clm7['Quater'].append(int(j.strip('.json')))
+                        
+    top_user_state=pd.DataFrame(clm7)   
+
+    top_user_state['state_name']=top_user_state['state_name'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_user_state['state_name']=top_user_state['state_name'].str.replace('-',' ')
+    top_user_state['state_name']=top_user_state['state_name'].str.title()
+    top_user_state['state_name']=top_user_state['state_name'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')      
+
+    path8="C:/Users/azaru/Azar documents/data/pulse/data/top/user/country/state/"
+    top_user_dist_list = os.listdir(path8)
+
+    clm8={'State':[], 'Year':[], 'Quater':[], 'district_name':[], 'registeredUsers':[]}
+
+    for i in top_user_dist_list:
+        p_i=path8+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D8=json.load(data)
+                for z in D8['data']['districts']:
+                    name=z['name']
+                    reguser=z['registeredUsers']
+                    clm8['district_name'].append(name)
+                    clm8['registeredUsers'].append(reguser)
+                    clm8['State'].append(i)
+                    clm8['Year'].append(j)
+                    clm8['Quater'].append(int(k.strip('.json')))
+
+    top_user_dist=pd.DataFrame(clm8)  
+
+    top_user_dist['State']=top_user_dist['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_user_dist['State']=top_user_dist['State'].str.replace('-',' ')
+    top_user_dist['State']=top_user_dist['State'].str.title()
+    top_user_dist['State']=top_user_dist['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    path9="C:/Users/azaru/Azar documents/data/pulse/data/top/user/country/state/"
+    top_user_pin_list = os.listdir(path9)
+
+    clm9={'State':[], 'Year':[], 'Quater':[], 'pincode':[], 'registeredUsers':[]}
+
+    for i in top_user_pin_list:
+        p_i=path9+i+"/"
+        agg_year=os.listdir(p_i)
+        for j in agg_year:
+            p_j=p_i+j+"/"
+            agg_year_list=os.listdir(p_j)
+            for k in agg_year_list:
+                p_k=p_j+k
+                data=open(p_k,'r')
+                D9=json.load(data)
+                for z in D8['data']['pincodes']:
+                    name=z['name']
+                    reguser=z['registeredUsers']
+                    clm9['pincode'].append(name)
+                    clm9['registeredUsers'].append(reguser)
+                    clm9['State'].append(i)
+                    clm9['Year'].append(j)
+                    clm9['Quater'].append(int(k.strip('.json')))
+
+    top_user_pin=pd.DataFrame(clm9)  
+
+    top_user_pin['State']=top_user_pin['State'].str.replace('andaman-&-nicobar-islands','Andaman & Nicobar')
+    top_user_pin['State']=top_user_pin['State'].str.replace('-',' ')
+    top_user_pin['State']=top_user_pin['State'].str.title()
+    top_user_pin['State']=top_user_pin['State'].str.replace('dadra-&-nagar-haveli-&-daman-&-diu','Dadra and Nagar Haveli and Daman and Diu')
+
+    client = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="azarudeen1997", 
+        database="phonepe_data"
+    )   
+    cursor = client.cursor()
+
+    query = """create table if not exists agg_transaction(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    Transacion_type varchar(250),
+                                                    Transacion_count int,
+                                                    Transacion_amount bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into agg_transaction values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in agg_trans.index:
+        row = tuple(agg_trans.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),int(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists agg_users(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    brand_name varchar(250),
+                                                    Transacion_count int,
+                                                    percentage decimal(4,2) 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into agg_users values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in agg_user.index:
+        row = tuple(agg_user.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),float(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists map_transaction(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    state_name varchar(250),
+                                                    Transacion_count int,
+                                                    Transacion_amount bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into map_transaction values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in map_trans.index:
+        row = tuple(map_trans.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),int(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists map_users(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    district varchar(250),
+                                                    registeredUsers int,
+                                                    appOpens bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into map_users values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in map_user.index:
+        row = tuple(map_user.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),int(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_transaction_states(
+                                                    Year int,
+                                                    Quater int,
+                                                    state_name varchar(250),
+                                                    Transacion_count bigint,
+                                                    Transacion_amount bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_transaction_states values (%s,%s,%s,%s,%s)"
+    values = []
+    for i in top_trans_state.index:
+        row = tuple(top_trans_state.loc[i].values)
+        value = (int(row[0]),int(row[1]),str(row[2]),int(row[3]),int(row[4]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_transaction_district(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    district_name varchar(250),
+                                                    Transacion_count bigint,
+                                                    Transacion_amount bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_transaction_district values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in top_trans_dist.index:
+        row = tuple(top_trans_dist.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),int(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_transaction_pincode(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    pincode varchar(150),
+                                                    Transacion_count bigint,
+                                                    Transacion_amount bigint 
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_transaction_pincode values (%s,%s,%s,%s,%s,%s)"
+    values = []
+    for i in top_trans_pin.index:
+        row = tuple(top_trans_pin.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]),int(row[5]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_user_states(
+                                                    Year int,
+                                                    Quater int,
+                                                    state_name varchar(250),
+                                                    registeredUsers bigint
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_user_states values (%s,%s,%s,%s)"
+    values = []
+    for i in top_user_state.index:
+        row = tuple(top_user_state.loc[i].values)
+        value = (int(row[0]),int(row[1]),str(row[2]),int(row[3]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_user_district(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    district_name varchar(250),
+                                                    registeredUsers bigint
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_user_district values (%s,%s,%s,%s,%s)"
+    values = []
+    for i in top_user_dist.index:
+        row = tuple(top_user_dist.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
+    query = """create table if not exists top_user_pincode(State varchar(150),
+                                                    Year int,
+                                                    Quater int,
+                                                    pincode varchar(250),
+                                                    registeredUsers bigint
+                                                    )"""
+
+
+    cursor.execute(query) 
+
+    query = "insert into top_user_pincode values (%s,%s,%s,%s,%s)"
+    values = []
+    for i in top_user_pin.index:
+        row = tuple(top_user_pin.loc[i].values)
+        value = (str(row[0]),int(row[1]),int(row[2]),str(row[3]),int(row[4]))
+        values.append(value)
+    cursor.executemany(query,values)
+    client.commit()
+
 client = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -686,4 +1215,4 @@ elif select == "Top Charts":
         st.plotly_chart(fig_q_10)
 
     else:
-        pass
+        pass    
