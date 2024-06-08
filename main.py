@@ -543,147 +543,54 @@ client = mysql.connector.connect(
     database="phonepe_data"
 )   
 cursor = client.cursor()
-query = "select * from agg_transaction"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-agg_trans_data = pd.DataFrame(data)    
 
-query = " desc agg_transaction"
+query = '''select * from agg_transaction'''
 cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-agg_trans_data.columns = col_names 
+data = cursor.fetchall()
+agg_trans_data = pd.DataFrame(data,columns=['State','Year','Quater','Transacion_type','Transacion_count','Transacion_amount'])
+query = '''select State,SUM(Transacion_amount) as Transacion_amount ,SUM(Transacion_count) as Transacion_count 
+            from agg_transaction
+            group by State'''
+cursor.execute(query)
+data_1 = cursor.fetchall()
+agg_trans_data_1 = pd.DataFrame(data_1,columns=['State','Transacion_count','Transacion_amount'])
 
 query = "select * from agg_users"
 cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-agg_user_data = pd.DataFrame(data)    
+data_2 = cursor.fetchall()
+agg_user_data = pd.DataFrame(data_2,columns=['State','Year','Quater','brand_name','Transacion_count','percentage'])
 
-query = " desc agg_users"
+query = '''select brand_name,percentage,SUM(Transacion_count) as Transacion_count 
+            from agg_users
+            group by brand_name,percentage
+            ORDER BY Transacion_count '''
 cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-agg_user_data.columns = col_names 
+data_3 = cursor.fetchall()
+agg_user_data_1 = pd.DataFrame(data_3,columns=['brand_name','percentage','Transacion_count'])
 
 query = "select * from map_transaction"
 cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-map_trans_data = pd.DataFrame(data)    
+data_4 = cursor.fetchall()
+map_trans_data = pd.DataFrame(data_4,columns=['State','Year','Quater','state_name','Transacion_count','Transacion_amount'])
 
-query = " desc map_transaction"
+query = '''select state_name,SUM(Transacion_amount) as Transacion_amount ,SUM(Transacion_count) as Transacion_count
+            from  map_transaction
+            group by state_name'''
 cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-map_trans_data.columns = col_names 
+data_5 = cursor.fetchall()
+map_trans_data_1 = pd.DataFrame(data_5,columns=['state_name','Transacion_count','Transacion_amount'])
 
 query = "select * from map_users"
 cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-map_user_data = pd.DataFrame(data)    
+data_5 = cursor.fetchall()
+map_user_data = pd.DataFrame(data_5,columns=['State','Year','Quater','district','registeredUsers','appOpens'])
 
-query = " desc map_users"
+query = '''select State,district,registeredUsers
+            from map_users
+            group by State,district,registeredUsers'''
 cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-map_user_data.columns = col_names 
-
-query = "select * from top_transaction_district"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_trans_dist_data = pd.DataFrame(data)    
-
-query = " desc top_transaction_district"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_trans_dist_data.columns = col_names 
-
-query = "select * from top_transaction_pincode"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_trans_pin_data = pd.DataFrame(data)    
-
-query = " desc top_transaction_pincode"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_trans_pin_data.columns = col_names 
-
-
-query = "select * from top_transaction_states"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_trans_state_data = pd.DataFrame(data)    
-
-query = " desc top_transaction_states"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_trans_state_data.columns = col_names 
-
-query = "select * from top_user_district"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_user_dist_data = pd.DataFrame(data)    
-
-query = " desc top_user_district"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_user_dist_data.columns = col_names 
-
-query = "select * from top_user_pincode"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_user_pin_data = pd.DataFrame(data)    
-
-query = " desc top_user_pincode"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_user_pin_data.columns = col_names 
-
-query="select * from top_user_states"
-cursor.execute(query)
-data = []
-for item in cursor:
-    data.append(item)
-top_user_state_data = pd.DataFrame(data)
-
-query = " desc top_user_states"
-cursor.execute(query)
-col_names = []
-for col in cursor:
-    col_names.append(col[0])
-top_user_state_data.columns = col_names 
-
+data_6 = cursor.fetchall()
+map_user_data_1 = pd.DataFrame(data_6,columns=['State','district','registeredUsers'])
 
 def trans_amount_count_Y(df , year):
     trans_agg_ac=df[df['Year'] == year]
@@ -748,6 +655,14 @@ def trans_amount_count_Y_Q(df , quater):
         fig_count = px.bar(trans_agg_ac_grp, x="State", y="Transacion_count", title=f"TRANSACTION COUNT - {trans_agg_ac["Year"].unique()} YEAR - {quater} QUATER ", color_discrete_sequence=px.colors.sequential.YlGnBu_r)
         st.plotly_chart(fig_count)
 
+    col1,col2 = st.columns(2)
+    with col1:
+        fig_amount = px.bar(agg_trans_data_1, x="State", y="Transacion_amount", title=f"TOTAL - TRANSACTION AMOUNT ", color_discrete_sequence=px.colors.sequential.Electric_r)
+        st.plotly_chart(fig_amount)
+    with col2:
+        fig_count = px.bar(agg_trans_data_1, x="State", y="Transacion_count", title=f"TOTAL - TRANSACTION COUNT ", color_discrete_sequence=px.colors.sequential.haline_r)
+        st.plotly_chart(fig_count)    
+
 def trans_amount_count_S(df , State):
     trans_agg_ac=df[df['State'] == State]
     trans_agg_ac.reset_index(drop=True,inplace=True)
@@ -757,10 +672,10 @@ def trans_amount_count_S(df , State):
     col1,col2 = st.columns(2)
    
     with col1:
-        fig_pie_1 = px.pie(data_frame=trans_agg_ac_grp , names='Transacion_type' ,values='Transacion_amount' ,hole=0.5,width=600,title=f'{State} - Transacion_amount')
+        fig_pie_1 = px.pie(data_frame=trans_agg_ac_grp , names='Transacion_type' ,values='Transacion_amount' ,hole=0.5,width=600,title=f'{State} - Transacion_amount',color_discrete_sequence=px.colors.carto.Agsunset_r)
         st.plotly_chart(fig_pie_1)
     with col2:
-        fig_pie_2 = px.pie(data_frame=trans_agg_ac_grp , names='Transacion_type' ,values='Transacion_count' ,hole=0.5,width=600,title=f'{State} - Transacion_count')
+        fig_pie_2 = px.pie(data_frame=trans_agg_ac_grp , names='Transacion_type' ,values='Transacion_count' ,hole=0.5,width=600,title=f'{State} - Transacion_count',color_discrete_sequence=px.colors.carto.Agsunset_r)
         st.plotly_chart(fig_pie_2)
 
 def user_amount_count_Y(df , year):
@@ -816,6 +731,9 @@ def user_amount_count_Q(df , quater):
 
     fig_count_1 = px.line(data_frame=trans_agg_user_grp ,x="brand_name" ,y="Transacion_count",hover_data="percentage",title="BRANDS , TRANSACTION COUNT , PERCENTAGE",width=1200,height=500,markers=True)     
     st.plotly_chart(fig_count_1)
+
+    fig_count_2 = px.bar(agg_user_data_1, x="Transacion_count", y="brand_name", title=f"TOTAL - TRANSACTION COUNT", color_discrete_sequence=px.colors.sequential.Peach_r,hover_name="brand_name",width=1200,height=600,orientation='h')
+    st.plotly_chart(fig_count_2)
 
 def map_amount_count_Y(df , year):
     map_agg_ac=df[df['Year'] == year]
@@ -887,6 +805,9 @@ def map_amount_count_S(df , State):
     fig_count = px.bar(map_agg_ac_grp, x="Transacion_count", y="state_name",orientation='h', title=f"TRANSACTION COUNT - {map_agg_ac["Year"].unique()} - YEAR  ", color_discrete_sequence=px.colors.sequential.Plotly3_r,width=1200,height=500)
     st.plotly_chart(fig_count)
 
+    fig_1 = px.area(map_trans_data_1,x='Transacion_amount',y='state_name',color='state_name',markers=True,width=1200,height=500)
+    st.plotly_chart(fig_1)
+
 def map_user_amount_count_Y(df , year):
     map_agg_user=df[df['Year'] == year]
     map_agg_user.reset_index(drop=True,inplace=True)
@@ -940,7 +861,6 @@ def map_user_amount_count_S(df , State):
 
     fig_amount_2 = px.bar(map_agg_user_ac_grp_1, x="registeredUsers", y="district",orientation='h' ,title=f"{State} - Registered Users ", color_discrete_sequence=px.colors.sequential.haline_r,width=1200,height=500)
     st.plotly_chart(fig_amount_2)  
-
     
 st.set_page_config(layout="wide")
 
